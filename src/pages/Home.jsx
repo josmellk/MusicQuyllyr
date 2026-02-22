@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import './Home.css';
 
 const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const [songs, setSongs] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSong, setEditingSong] = useState(null);
@@ -51,7 +51,7 @@ const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
         <div className="home-content">
             <div className="home-header-row">
                 <h1 className="greeting">Mis canciones</h1>
-                {user && (
+                {isAdmin && (
                     <button className="upload-btn-inline glass clickable" onClick={handleOpenUpload}>
                         Subir nueva
                     </button>

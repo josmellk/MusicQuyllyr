@@ -4,10 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import './LoginModal.css';
 
 const LoginModal = ({ isOpen, onClose }) => {
+    const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, register } = useAuth();
 
     if (!isOpen) return null;
 
@@ -15,10 +16,15 @@ const LoginModal = ({ isOpen, onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await login(email, password);
+            if (isRegister) {
+                await register(email, password);
+            } else {
+                await login(email, password);
+            }
             onClose();
         } catch (error) {
-            alert('Error al iniciar sesión: ' + error.message);
+            const action = isRegister ? 'registrarte' : 'iniciar sesión';
+            alert(`Error al ${action}: ` + error.message);
         } finally {
             setLoading(false);
         }
@@ -31,15 +37,19 @@ const LoginModal = ({ isOpen, onClose }) => {
                     <div className="icon-circle">
                         <Lock size={24} color="white" />
                     </div>
-                    <h2>Modo Administrador</h2>
-                    <p className="modal-subtitle">Inicia sesión para editar tu biblioteca</p>
+                    <h2>{isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'}</h2>
+                    <p className="modal-subtitle">
+                        {isRegister
+                            ? 'Regístrate para guardar tus canciones favoritas'
+                            : 'Inicia sesión para acceder a tu biblioteca'}
+                    </p>
                     <button className="close-btn clickable" onClick={onClose}><X /></button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
                     <input
                         type="email"
-                        placeholder="Email de administrador"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="text-input"
@@ -60,8 +70,22 @@ const LoginModal = ({ isOpen, onClose }) => {
                         className={`submit-btn clickable ${loading ? 'loading' : ''}`}
                         disabled={loading}
                     >
-                        {loading ? 'Iniciando sesión...' : 'Entrar'}
+                        {loading
+                            ? (isRegister ? 'Creando cuenta...' : 'Iniciando sesión...')
+                            : (isRegister ? 'Registrarse' : 'Entrar')}
                     </button>
+
+                    <div className="modal-footer">
+                        <button
+                            type="button"
+                            className="toggle-auth-btn clickable"
+                            onClick={() => setIsRegister(!isRegister)}
+                        >
+                            {isRegister
+                                ? '¿Ya tienes cuenta? Inicia sesión'
+                                : '¿No tienes cuenta? Regístrate'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

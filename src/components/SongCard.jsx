@@ -5,7 +5,7 @@ import { toggleLike } from '../services/songService';
 import './SongCard.css';
 
 const SongCard = ({ song, onClick, onEdit }) => {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const isLiked = song.likedBy?.includes(user?.uid);
 
     const handleLike = async (e) => {
@@ -37,7 +37,7 @@ const SongCard = ({ song, onClick, onEdit }) => {
                         <Heart size={20} fill={isLiked ? "var(--spotify-green)" : "none"} color={isLiked ? "var(--spotify-green)" : "white"} />
                     </button>
 
-                    {user && (
+                    {isAdmin && (
                         <button
                             className="edit-button glass"
                             onClick={(e) => {

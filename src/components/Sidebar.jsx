@@ -6,7 +6,7 @@ import LoginModal from './LoginModal';
 import './Sidebar.css';
 
 const Sidebar = ({ onSearchClick }) => {
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [likedCount, setLikedCount] = useState(0);
 
@@ -61,14 +61,14 @@ const Sidebar = ({ onSearchClick }) => {
                                 <LogOut size={16} color="white" />
                             </div>
                             <div className="profile-info">
-                                <p className="user-name">Administrador</p>
+                                <p className="user-name">{isAdmin ? 'Administrador' : 'Mi Cuenta'}</p>
                                 <p className="logout-text">Cerrar sesión</p>
                             </div>
                         </div>
                     ) : (
                         <button className="login-trigger-btn clickable" onClick={() => setIsLoginOpen(true)}>
                             <User size={20} />
-                            <span>Modo Admin</span>
+                            <span>Entrar / Registrarse</span>
                         </button>
                     )}
                 </div>

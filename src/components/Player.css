@@ -70,8 +70,8 @@
 }
 
 .play-pause-btn {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background-color: white;
     border: none;
@@ -79,6 +79,7 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.1s ease;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 .play-pause-btn:hover {

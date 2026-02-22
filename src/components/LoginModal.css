@@ -34,3 +34,22 @@
     font-size: 14px;
     color: var(--text-muted);
 }
+
+.modal-footer {
+    margin-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 16px;
+}
+
+.toggle-auth-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.toggle-auth-btn:hover {
+    color: white;
+    text-decoration: underline;
+}

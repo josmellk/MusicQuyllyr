@@ -35,16 +35,35 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying }) => {
         if (currentTrack) {
             const finalUrl = cleanUrl(currentTrack.audioUrl);
             console.log("Cargando audio desde:", finalUrl);
+
+            // Reiniciar el audio para la nueva pista
+            audioRef.current.pause();
             audioRef.current.src = finalUrl;
+            audioRef.current.load(); // Forzar carga del nuevo recurso
+
             if (isPlaying) {
-                audioRef.current.play().catch(err => console.error("Auto-play error:", err));
+                const playPromise = audioRef.current.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.error("Auto-play blocked or error:", err);
+                        setIsPlaying(false);
+                    });
+                }
             }
         }
     }, [currentTrack]);
 
     useEffect(() => {
+        if (!currentTrack?.audioUrl) return;
+
         if (isPlaying) {
-            audioRef.current.play().catch(err => console.error("Error playing:", err));
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.error("Manual play error:", err);
+                    setIsPlaying(false);
+                });
+            }
         } else {
             audioRef.current.pause();
         }
@@ -125,7 +144,7 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying }) => {
                     <Shuffle size={16} className="control-icon secondary" />
                     <SkipBack size={20} className="control-icon" />
                     <button className="play-pause-btn clickable" onClick={togglePlay}>
-                        {isPlaying ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" />}
+                        {isPlaying ? <Pause size={28} fill="black" strokeWidth={3} /> : <Play size={28} fill="black" />}
                     </button>
                     <SkipForward size={20} className="control-icon" />
                     <Repeat size={16} className="control-icon secondary" />
