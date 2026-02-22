@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Search, Library, Plus, Heart, User, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { subscribeToSongs } from '../services/songService';
 import LoginModal from './LoginModal';
 import './Sidebar.css';
 
 const Sidebar = ({ onSearchClick }) => {
     const { user, logout } = useAuth();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [likedCount, setLikedCount] = useState(0);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToSongs((songs) => {
+            const count = songs.filter(song => song.likedBy?.includes(user?.uid)).length;
+            setLikedCount(count);
+        });
+        return () => unsubscribe();
+    }, [user]);
 
     return (
         <aside className="sidebar">
@@ -39,7 +49,7 @@ const Sidebar = ({ onSearchClick }) => {
                         </div>
                         <div className="playlist-info">
                             <p className="playlist-name">Canciones que te gustan</p>
-                            <p className="playlist-type">Playlist • 0 canciones</p>
+                            <p className="playlist-type">Playlist • {likedCount} canciones</p>
                         </div>
                     </div>
                 </div>

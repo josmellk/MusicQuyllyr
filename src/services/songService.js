@@ -1,5 +1,30 @@
-import { collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
+
+export const subscribeToSongs = (callback) => {
+    const q = query(collection(db, "songs"), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+        const songs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        callback(songs);
+    }, (error) => {
+        console.error("Error subscribing to songs:", error);
+    });
+};
+
+export const toggleLike = async (songId, userId, isLiked) => {
+    try {
+        const docRef = doc(db, "songs", songId);
+        await updateDoc(docRef, {
+            likedBy: isLiked ? arrayRemove(userId) : arrayUnion(userId)
+        });
+    } catch (error) {
+        console.error("Error toggling like:", error);
+        throw error;
+    }
+};
 
 export const saveSongMetadata = async (songData) => {
     try {

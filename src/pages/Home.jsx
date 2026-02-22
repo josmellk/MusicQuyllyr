@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SongCard from '../components/SongCard';
 import UploadModal from '../components/UploadModal';
-import { fetchSongs } from '../services/songService';
+import { subscribeToSongs } from '../services/songService';
 import { useAuth } from '../context/AuthContext';
 import './Home.css';
 
@@ -17,16 +17,20 @@ const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
         song.artist.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const loadSongs = async () => {
-        setLoading(true);
-        const data = await fetchSongs();
-        setSongs(data);
-        setLoading(false);
-    };
-
     useEffect(() => {
-        loadSongs();
+        setLoading(true);
+        const unsubscribe = subscribeToSongs((data) => {
+            setSongs(data);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, []);
+
+    const loadSongs = () => {
+        // Esta función se mantiene para compatibilidad con UploadModal (onUploadSuccess)
+        // pero la actualización ya ocurre en tiempo real vía onSnapshot.
+    };
 
     const handleOpenUpload = () => {
         setEditingSong(null);
