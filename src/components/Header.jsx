@@ -1,7 +1,10 @@
 import { ChevronLeft, ChevronRight, User, Search } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
-const Header = ({ searchQuery, setSearchQuery, inputRef }) => {
+const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick }) => {
+    const { user, logout, isAdmin } = useAuth();
+
     return (
         <header className="header">
             <div className="nav-controls">
@@ -27,10 +30,13 @@ const Header = ({ searchQuery, setSearchQuery, inputRef }) => {
             </div>
 
             <div className="user-controls">
-                <button className="upgrade-btn clickable">Ver planes</button>
-                <button className="profile-btn clickable">
+                <button
+                    className="profile-btn clickable"
+                    onClick={user ? logout : onLoginClick}
+                    title={user ? 'Cerrar sesión' : 'Iniciar sesión'}
+                >
                     <User size={20} />
-                    <span>Usuario</span>
+                    <span>{user ? (isAdmin ? 'Admin' : 'Mi Cuenta') : 'Entrar'}</span>
                 </button>
             </div>
         </header>

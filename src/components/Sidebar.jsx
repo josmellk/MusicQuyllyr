@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Home, Search, Library, Plus, Heart, User, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { subscribeToSongs } from '../services/songService';
-import LoginModal from './LoginModal';
 import './Sidebar.css';
 
-const Sidebar = ({ onSearchClick }) => {
+const Sidebar = ({ onSearchClick, onLoginClick }) => {
     const { user, logout, isAdmin } = useAuth();
-    const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [likedCount, setLikedCount] = useState(0);
 
     useEffect(() => {
@@ -66,15 +64,13 @@ const Sidebar = ({ onSearchClick }) => {
                             </div>
                         </div>
                     ) : (
-                        <button className="login-trigger-btn clickable" onClick={() => setIsLoginOpen(true)}>
+                        <button className="login-trigger-btn clickable" onClick={onLoginClick}>
                             <User size={20} />
                             <span>Entrar / Registrarse</span>
                         </button>
                     )}
                 </div>
             </div>
-
-            <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
         </aside>
     );
 };
