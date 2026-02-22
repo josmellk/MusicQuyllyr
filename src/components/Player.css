@@ -250,7 +250,11 @@
         gap: 16px;
     }
 
-    .control-icon.secondary,
+    .control-icon.secondary {
+        display: flex;
+        /* Show Shuffle/Repeat on mobile */
+    }
+
     .volume-controls,
     .progress-container {
         display: none;

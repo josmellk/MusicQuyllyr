@@ -270,14 +270,5 @@
         color: var(--color-accent);
     }
 
-    /* Hide desktop elements on mobile bottom bar */
-    .library-card,
-    .admin-section,
-    .library-header,
-    .library-content {
-        display: none;
-    }
-
-    /* Show special mobile Tu Biblioteca button in bottom bar if we want it */
-    /* For now, let's keep it simple: Inicio, Buscar, Tu Biblioteca (link to something?) */
+    /* Remove the restrictive hide that might interfere with view rendering */
 }

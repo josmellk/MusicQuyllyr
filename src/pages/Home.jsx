@@ -135,9 +135,13 @@ const Home = ({ setCurrentTrack, setIsPlaying, setQueue, currentTrack, isPlaying
                                 isCurrent={currentTrack?.id === song.id}
                                 isPlaying={isPlaying}
                                 onClick={() => {
-                                    setQueue(filteredSongs);
-                                    setCurrentTrack(song);
-                                    setIsPlaying(true);
+                                    if (currentTrack?.id === song.id) {
+                                        setIsPlaying(!isPlaying);
+                                    } else {
+                                        setQueue(filteredSongs);
+                                        setCurrentTrack(song);
+                                        setIsPlaying(true);
+                                    }
                                 }}
                                 onEdit={onEditClick}
                             />

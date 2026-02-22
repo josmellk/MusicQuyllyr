@@ -46,7 +46,7 @@
 
   .scrollable-content {
     padding: 16px;
-    padding-bottom: 80px;
-    /* Space for the bottom bar */
+    padding-bottom: 150px;
+    /* Space for both Player (~75px) and Bottom Nav (~65px) */
   }
 }

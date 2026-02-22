@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Edit2, Heart, Plus, Check } from 'lucide-react';
+import { Play, Pause, Edit2, Heart, Plus, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toggleLike } from '../services/songService';
 import { addSongToPlaylist, removeSongFromPlaylist } from '../services/playlistService';
@@ -73,7 +73,11 @@ const SongCard = ({ song, onClick, onEdit, playlists = [], isCurrent = false, is
 
                 <div className="card-overlay">
                     <button className="play-button glass">
-                        <Play fill="black" color="black" size={24} />
+                        {isCurrent && isPlaying ? (
+                            <Pause fill="black" color="black" size={24} />
+                        ) : (
+                            <Play fill="black" color="black" size={24} />
+                        )}
                     </button>
 
                     <button
