@@ -49,6 +49,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 4px;
+    z-index: 10;
+    /* Ensure on top of playing-overlay */
 }
 
 .song-card:hover .card-overlay {
@@ -114,9 +116,30 @@
     transform: scale(1.1);
 }
 
+.playlist-add-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.playlist-add-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+    border-color: var(--color-accent);
+}
+
 .like-button.liked {
-    background: rgba(29, 185, 84, 0.1);
-    border-color: var(--spotify-green);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-accent);
 }
 
 .card-title {
@@ -247,9 +270,16 @@
     }
 
     .like-button,
+    .playlist-add-button,
     .edit-button {
         width: 36px;
         height: 36px;
+    }
+
+    .edit-button {
+        top: 8px;
+        right: 48px;
+        /* Offset to not overlap Plus button */
     }
 
     .playlist-menu {

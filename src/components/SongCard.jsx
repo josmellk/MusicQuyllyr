@@ -22,14 +22,15 @@ const SongCard = ({ song, onClick, onEdit, playlists = [], isCurrent = false, is
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleLikeClick = (e) => {
+    const handleMenuToggle = (e) => {
         e.stopPropagation();
-        if (!user) return alert('Debes iniciar sesión para guardar canciones');
+        if (!user) return alert('Debes iniciar sesión para usar esta función');
         setShowPlaylistMenu(!showPlaylistMenu);
     };
 
     const handleToggleFavorite = async (e) => {
         e.stopPropagation();
+        if (!user) return alert('Debes iniciar sesión para guardar favoritos');
         try {
             await toggleLike(song.id, user.uid, isLiked);
         } catch (error) {
@@ -77,10 +78,18 @@ const SongCard = ({ song, onClick, onEdit, playlists = [], isCurrent = false, is
 
                     <button
                         className={`like-button glass ${isLiked ? 'liked' : ''}`}
-                        onClick={handleLikeClick}
+                        onClick={handleToggleFavorite}
+                        title={isLiked ? "Quitar de favoritos" : "Me gusta"}
+                    >
+                        <Heart size={20} fill={isLiked ? "var(--color-accent)" : "none"} color={isLiked ? "var(--color-accent)" : "white"} />
+                    </button>
+
+                    <button
+                        className="playlist-add-button glass"
+                        onClick={handleMenuToggle}
                         title="Agregar a lista"
                     >
-                        <Heart size={20} fill={isLiked ? "var(--spotify-green)" : "none"} color={isLiked ? "var(--spotify-green)" : "white"} />
+                        <Plus size={20} color="white" />
                     </button>
 
                     {showPlaylistMenu && (
