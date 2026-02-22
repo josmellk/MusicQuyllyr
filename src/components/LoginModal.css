@@ -1,0 +1,36 @@
+.login-modal {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    animation: modalEnter 0.3s ease-out;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    background: var(--spotify-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.modal-header h2 {
+    margin-bottom: 8px;
+}
+
+.modal-header .modal-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+}

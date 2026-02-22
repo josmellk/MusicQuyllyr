@@ -1,0 +1,168 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.upload-modal {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 12px;
+    padding: 32px;
+    animation: modalEnter 0.3s ease-out;
+}
+
+@keyframes modalEnter {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.modal-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.input-group-url {
+    display: flex;
+    align-items: center;
+    background: var(--bg-highlight);
+    border-radius: 4px;
+    padding: 0 12px;
+}
+
+.input-icon {
+    color: var(--text-muted);
+}
+
+.full-width {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+}
+
+.text-input {
+    background: var(--bg-highlight);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 12px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+}
+
+.text-input:focus {
+    border-color: var(--text-muted);
+    background: #333;
+}
+
+.help-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.examples-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.examples-box ul {
+    margin: 8px 0 0 16px;
+    padding: 0;
+}
+
+.examples-box li {
+    margin-bottom: 4px;
+}
+
+.examples-box code {
+    background: #444;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: var(--spotify-green);
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.delete-btn {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    color: #ff4444;
+    padding: 14px;
+    border-radius: 30px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: rgba(255, 0, 0, 0.2);
+    transform: scale(1.02);
+}
+
+.submit-btn {
+    background: var(--spotify-green);
+    color: black;
+    border: none;
+    border-radius: 24px;
+    padding: 15px;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+    background: var(--spotify-green-hover);
+    transform: scale(1.02);
+}
+
+.submit-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

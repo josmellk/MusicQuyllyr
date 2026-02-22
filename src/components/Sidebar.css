@@ -1,0 +1,182 @@
+.sidebar {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+}
+
+.nav-card {
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.nav-item.active,
+.nav-item:hover {
+    color: var(--text-base);
+}
+
+.library-card {
+    flex: 1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.library-header {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.library-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.library-title:hover {
+    color: var(--text-base);
+}
+
+.add-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-base);
+}
+
+.library-content {
+    padding: 8px;
+    overflow-y: auto;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.playlist-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.playlist-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-highlight);
+}
+
+.playlist-icon.heart {
+    background: linear-gradient(135deg, #450af5, #c4efd9);
+}
+
+.playlist-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.playlist-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-base);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlist-type {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.admin-section {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+.login-trigger-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    transition: color 0.2s ease;
+    width: 100%;
+}
+
+.login-trigger-btn:hover {
+    color: var(--text-base);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-profile:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--spotify-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-base);
+}
+
+.logout-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
