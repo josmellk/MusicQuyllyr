@@ -136,19 +136,19 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess, editingSong }) => {
                     </div>
 
                     <p className="help-text">
-                        Tip: Puedes subir tus archivos a sitios como Dropbox o Google Drive y pegar el enlace directo aquí.
+                        Tip: **Dropbox** es la opción más confiable. Sube tu archivo, copia el enlace y pégalo aquí. El sistema lo ajustará automáticamente.
                     </p>
                     <p className="help-text">
-                        <strong>¿Qué es un enlace directo?</strong> Es un link que al abrirlo solo muestra el reproductor de música del navegador, sin botones de "Descargar" o "Iniciar sesión".
+                        <strong>¿Qué es un enlace directo?</strong> Es un link que carga la canción de inmediato. Evita enlaces que lleven a páginas con anuncios o botones de descarga grandes.
                     </p>
 
                     <div className="examples-box">
-                        <span>Ejemplos:</span>
+                        <span>Opciones recomendadas:</span>
                         <ul>
-                            <li><strong>GitHub:</strong> Sube el archivo y usa el link del botón "Raw".</li>
-                            <li><strong>Dropbox:</strong> Cambia <code>?dl=0</code> por <code>?raw=1</code></li>
-                            <li><strong>Discord:</strong> Sube el archivo y dale "Copiar enlace".</li>
-                            <li><strong>Catbox.moe:</strong> Sube el archivo y usa el link que te den.</li>
+                            <li><strong>Dropbox (Recomendado):</strong> Copia el link y pégalo. (Ej: <code>dropbox.com/.../musica.mp3?dl=0</code>)</li>
+                            <li><strong>GitHub:</strong> Usa el link del botón "Raw" de tu repositorio.</li>
+                            <li><strong>Discord:</strong> Sube el archivo a un canal y usa "Copiar enlace del archivo".</li>
+                            <li><strong>Firebase:</strong> Si sabes usarlo, los enlaces de Firebase Storage son permanentes.</li>
                         </ul>
                     </div>
 
