@@ -1,9 +1,27 @@
-import { ChevronLeft, ChevronRight, User, Search } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, User, Search, LogOut, Moon, Sun, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
-const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick }) => {
+const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick, isDarkMode, setIsDarkMode }) => {
     const { user, logout, isAdmin } = useAuth();
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowProfileMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleLogout = async () => {
+        setShowProfileMenu(false);
+        await logout();
+    };
 
     return (
         <header className="header">
@@ -29,15 +47,48 @@ const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick }) => {
                 </div>
             </div>
 
-            <div className="user-controls">
-                <button
-                    className="profile-btn clickable"
-                    onClick={user ? logout : onLoginClick}
-                    title={user ? 'Cerrar sesión' : 'Iniciar sesión'}
-                >
-                    <User size={20} />
-                    <span>{user ? (isAdmin ? 'Admin' : 'Mi Cuenta') : 'Entrar'}</span>
-                </button>
+            <div className="user-controls" ref={menuRef}>
+                {user ? (
+                    <div className="profile-container">
+                        <button
+                            className={`profile-btn clickable ${showProfileMenu ? 'active' : ''}`}
+                            onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        >
+                            <div className="profile-avatar">
+                                <User size={18} />
+                            </div>
+                            <span>{isAdmin ? 'Administrador' : (user.displayName || user.email?.split('@')[0] || 'Mi Cuenta')}</span>
+                            <ChevronDown size={16} className={`arrow-icon ${showProfileMenu ? 'rotate' : ''}`} />
+                        </button>
+
+                        {showProfileMenu && (
+                            <div className="profile-dropdown glass show">
+                                <div className="dropdown-header">
+                                    <p className="user-email">{user.email}</p>
+                                </div>
+                                <div className="dropdown-divider"></div>
+                                <div className="dropdown-item" onClick={() => setIsDarkMode(!isDarkMode)}>
+                                    <div className="item-content">
+                                        {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
+                                        <span>Modo Oscuro</span>
+                                    </div>
+                                    <div className={`toggle-switch ${isDarkMode ? 'on' : ''}`}>
+                                        <div className="toggle-knob"></div>
+                                    </div>
+                                </div>
+                                <div className="dropdown-divider"></div>
+                                <div className="dropdown-item logout" onClick={handleLogout}>
+                                    <LogOut size={16} />
+                                    <span>Cerrar sesión</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button className="login-btn glass clickable" onClick={onLoginClick}>
+                        Entrar
+                    </button>
+                )}
             </div>
         </header>
     );

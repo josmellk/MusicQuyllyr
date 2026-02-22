@@ -2,21 +2,51 @@
 
 :root {
   --font-family: 'Figtree', sans-serif;
-  
-  /* Spotify Colors */
-  --bg-black: #000000;
-  --bg-dark: #121212;
-  --bg-elevated: #181818;
-  --bg-highlight: #282828;
+
+  /* Sunset Premium Colors - Harmonized */
+  --bg-black: #050505;
+  --bg-dark: #0c0c0c;
+  --bg-elevated: #151515;
+  --bg-highlight: #222222;
+
+  --color-primary: #8e1b1b;
+  /* Refined Elegant Red */
+  --color-secondary: #d35400;
+  /* Sunset Orange */
+  --color-accent: #f1c40f;
+  /* Golden Yellow */
+
   --text-base: #FFFFFF;
-  --text-muted: #b3b3b3;
-  --spotify-green: #1db954;
-  --spotify-green-hover: #1ed760;
-  
+  --text-muted: #94a3b8;
+  --spotify-green: var(--color-accent);
+  --spotify-green-hover: var(--color-secondary);
+
+  /* Background Surfaces */
+  --app-bg: radial-gradient(circle at top left, #1a0505, #050505);
+  --column-bg: linear-gradient(135deg, rgba(80, 10, 10, 0.4) 0%, rgba(10, 10, 10, 0.1) 100%), var(--bg-dark);
+  --sidebar-bg: rgba(18, 8, 7, 0.95);
+
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.04);
   --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-blur: blur(10px);
+  --glass-blur: blur(16px);
+
+  /* Layout Constants */
+  --sidebar-width: 300px;
+  --header-height: 64px;
+  --player-height: 90px;
+  --mobile-nav-height: 65px;
+}
+
+/* Dark Theme Overrides (Red Surfaces become Black, Buttons stay same) */
+.dark-theme {
+  --app-bg: #000000;
+  --column-bg: #000000;
+  --sidebar-bg: #000000;
+  --bg-dark: #000000;
+  --bg-elevated: #050505;
+  --bg-highlight: #101010;
+  --glass-bg: rgba(255, 255, 255, 0.03);
 }
 
 * {

@@ -1,21 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Plus, Heart, Music, Trash2 } from 'lucide-react';
 import SongCard from '../components/SongCard';
-import UploadModal from '../components/UploadModal';
 import { subscribeToSongs } from '../services/songService';
 import { useAuth } from '../context/AuthContext';
 import './Home.css';
 
-const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
+const Home = ({ setCurrentTrack, setIsPlaying, setQueue, currentTrack, isPlaying, searchQuery, currentView, onViewChange, onUploadClick, onEditClick, playlists = [], onCreatePlaylist, onDeletePlaylist }) => {
     const { user, isAdmin } = useAuth();
     const [songs, setSongs] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingSong, setEditingSong] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const filteredSongs = songs.filter(song =>
-        song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        song.artist.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredSongs = useMemo(() => {
+        return songs.filter(song => {
+            const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                song.artist.toLowerCase().includes(searchQuery.toLowerCase());
+
+            if (currentView.type === 'liked') {
+                return matchesSearch && song.likedBy?.includes(user?.uid);
+            }
+
+            if (currentView.type === 'playlist') {
+                return matchesSearch && currentView.songIds?.includes(song.id);
+            }
+
+            return matchesSearch;
+        });
+    }, [songs, searchQuery, currentView, user?.uid]);
 
     useEffect(() => {
         setLoading(true);
@@ -27,32 +37,73 @@ const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
         return () => unsubscribe();
     }, []);
 
-    const loadSongs = () => {
-        // Esta función se mantiene para compatibilidad con UploadModal (onUploadSuccess)
-        // pero la actualización ya ocurre en tiempo real vía onSnapshot.
+    // Keep queue in sync with current view/search
+    useEffect(() => {
+        setQueue(filteredSongs);
+    }, [filteredSongs, setQueue]);
+
+    const getTitle = () => {
+        if (currentView.type === 'liked') return 'Canciones que te gustan';
+        if (currentView.type === 'playlist') return currentView.name || 'Mi lista';
+        if (currentView.type === 'library') return 'Tu biblioteca';
+        return 'Mis canciones';
     };
 
-    const handleOpenUpload = () => {
-        setEditingSong(null);
-        setIsModalOpen(true);
-    };
+    if (currentView.type === 'library') {
+        return (
+            <div className="home-content">
+                <div className="home-header-row">
+                    <h1 className="greeting">{getTitle()}</h1>
+                    <button className="upload-btn-inline glass clickable" onClick={() => onCreatePlaylist()}>
+                        <Plus size={20} /> Nueva lista
+                    </button>
+                </div>
 
-    const handleOpenEdit = (song) => {
-        setEditingSong(song);
-        setIsModalOpen(true);
-    };
+                <div className="library-grid mobile-library">
+                    <div
+                        className="library-item-card glass clickable"
+                        onClick={() => onViewChange({ type: 'liked' })}
+                    >
+                        <div className="playlist-icon heart">
+                            <Heart size={32} fill="white" />
+                        </div>
+                        <h3>Favoritos</h3>
+                        <p>Playlist • {songs.filter(s => s.likedBy?.includes(user?.uid)).length} canciones</p>
+                    </div>
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingSong(null);
-    };
+                    {playlists.map(playlist => (
+                        <div
+                            key={playlist.id}
+                            className="library-item-card glass clickable"
+                            onClick={() => onViewChange({ type: 'playlist', id: playlist.id, name: playlist.name, songIds: playlist.songIds })}
+                        >
+                            <div className="playlist-icon">
+                                <Music size={32} />
+                            </div>
+                            <h3>{playlist.name}</h3>
+                            <p>Playlist • {playlist.songIds?.length || 0} canciones</p>
+                            <button
+                                className="delete-library-btn clickable"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeletePlaylist(playlist.id);
+                                }}
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="home-content">
             <div className="home-header-row">
-                <h1 className="greeting">Mis canciones</h1>
+                <h1 className="greeting">{getTitle()}</h1>
                 {isAdmin && (
-                    <button className="upload-btn-inline glass clickable" onClick={handleOpenUpload}>
+                    <button className="upload-btn-inline glass clickable" onClick={onUploadClick}>
                         Subir nueva
                     </button>
                 )}
@@ -60,7 +111,7 @@ const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
 
             <section className="section">
                 <div className="section-header">
-                    <h2>Recientes</h2>
+                    <h2>{currentView.type === 'home' ? 'Recientes' : 'Contenido'}</h2>
                 </div>
 
                 {loading ? (
@@ -68,8 +119,8 @@ const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
                 ) : filteredSongs.length === 0 ? (
                     <div className="empty-state">
                         <p>{searchQuery ? `No se encontraron resultados para "${searchQuery}"` : "Aún no has subido ninguna canción."}</p>
-                        {!searchQuery && user && (
-                            <button className="create-btn glass clickable" onClick={handleOpenUpload}>
+                        {!searchQuery && user && isAdmin && (
+                            <button className="create-btn glass clickable" onClick={onUploadClick}>
                                 Subir mi primera canción
                             </button>
                         )}
@@ -80,23 +131,20 @@ const Home = ({ setCurrentTrack, setIsPlaying, searchQuery }) => {
                             <SongCard
                                 key={song.id}
                                 song={song}
+                                playlists={playlists}
+                                isCurrent={currentTrack?.id === song.id}
+                                isPlaying={isPlaying}
                                 onClick={() => {
+                                    setQueue(filteredSongs);
                                     setCurrentTrack(song);
                                     setIsPlaying(true);
                                 }}
-                                onEdit={handleOpenEdit}
+                                onEdit={onEditClick}
                             />
                         ))}
                     </div>
                 )}
             </section>
-
-            <UploadModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                onUploadSuccess={loadSongs}
-                editingSong={editingSong}
-            />
         </div>
     );
 };
