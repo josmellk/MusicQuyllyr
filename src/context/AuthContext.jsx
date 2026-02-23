@@ -34,11 +34,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin }}>
-            {loading ? (
-                <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#121212', color: 'white' }}>
-                    Cargando...
-                </div>
-            ) : children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 };
