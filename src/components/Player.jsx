@@ -7,21 +7,25 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
     const audioRef = useRef(new Audio());
 
     const cleanUrl = (url) => {
         if (!url) return '';
-        // Dropbox: Replace dl=0 with raw=1
+        // Dropbox: Force direct download subdomain for instant streaming
         if (url.includes('dropbox.com')) {
-            return url.replace('dl=0', 'raw=1').replace('dl=1', 'raw=1');
+            return url
+                .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                .replace('?dl=0', '')
+                .replace('?dl=1', '')
+                .replace('?raw=1', '');
         }
         // Google Drive: Convert view link to direct export link
         if (url.includes('drive.google.com')) {
             const match = url.match(/\/d\/(.+?)\/(view|edit|sharing)/) || url.match(/id=(.+?)(&|$)/);
             if (match && match[1]) {
-                // Try a cleaner direct access format
-                return `https://docs.google.com/uc?id=${match[1]}`;
+                return `https://drive.google.com/uc?id=${match[1]}`;
             }
         }
         // GitHub: Convert blob link to raw link
@@ -31,7 +35,7 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
         return url;
     };
 
-    // Use refs to access latest state inside stable event listeners
+    // Use refs for stable event listeners without re-binding
     const stateRef = useRef({ queue, currentTrack, isShuffle, repeatMode, isPlaying });
     useEffect(() => {
         stateRef.current = { queue, currentTrack, isShuffle, repeatMode, isPlaying };
@@ -39,7 +43,8 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
 
     useEffect(() => {
         const audio = audioRef.current;
-        audio.preload = 'auto'; // Optimize for faster playback
+        audio.preload = 'auto';
+        audio.crossOrigin = 'anonymous';
 
         const handleEnded = () => {
             if (stateRef.current.repeatMode === 1) {
@@ -51,6 +56,7 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
         };
 
         const updateProgress = () => {
+            if (!audio.duration) return;
             setCurrentTime(audio.currentTime);
             setProgress((audio.currentTime / audio.duration) * 100);
         };
@@ -61,43 +67,56 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
 
         const handleError = (e) => {
             console.error("Audio error:", audio.error);
-            if (audio.error?.code === 4) {
-                alert("Error de Formato: No se pudo leer el archivo.");
-            }
             setIsPlaying(false);
         };
+
+        const handleLoadStart = () => setIsLoading(true);
+        const handleCanPlay = () => setIsLoading(false);
+        const handleWaiting = () => setIsLoading(true);
 
         audio.addEventListener('timeupdate', updateProgress);
         audio.addEventListener('loadedmetadata', handleLoadedMetadata);
         audio.addEventListener('error', handleError);
         audio.addEventListener('ended', handleEnded);
+        audio.addEventListener('loadstart', handleLoadStart);
+        audio.addEventListener('canplay', handleCanPlay);
+        audio.addEventListener('waiting', handleWaiting);
 
         return () => {
             audio.removeEventListener('timeupdate', updateProgress);
             audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
             audio.removeEventListener('error', handleError);
             audio.removeEventListener('ended', handleEnded);
+            audio.removeEventListener('loadstart', handleLoadStart);
+            audio.removeEventListener('canplay', handleCanPlay);
+            audio.removeEventListener('waiting', handleWaiting);
         };
-    }, []); // Run once, using stateRef for logic
+    }, []);
 
-    // Simplified track loading and playback logic
+    // TURBO: Fast track loading and playback logic
     useEffect(() => {
         if (!currentTrack) return;
 
         const finalUrl = cleanUrl(currentTrack.audioUrl);
         const audio = audioRef.current;
 
-        if (audio.src !== finalUrl) {
+        if (audio.dataset.rawSrc !== finalUrl) {
             audio.pause();
             audio.src = finalUrl;
-            // No need for audio.load() usually when setting src
+            audio.dataset.rawSrc = finalUrl;
         }
 
         if (isPlaying) {
-            audio.play().catch(err => {
-                console.error("Playback failed:", err);
-                setIsPlaying(false);
-            });
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    if (err.name !== 'AbortError') {
+                        setIsPlaying(false);
+                    }
+                });
+            }
+        } else {
+            audio.pause();
         }
     }, [currentTrack, isPlaying]);
 
@@ -188,7 +207,6 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
 
     const togglePlay = () => {
         if (!currentTrack && queue.length > 0) {
-            // Si no hay canción pero hay cola, empezar reproducción
             const startIndex = isShuffle ? Math.floor(Math.random() * queue.length) : 0;
             setCurrentTrack(queue[startIndex]);
             setIsPlaying(true);
@@ -212,9 +230,11 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
             <div className="track-info">
                 {currentTrack ? (
                     <>
-                        <img src={currentTrack.coverUrl} alt={currentTrack.title} className="now-playing-cover" />
+                        <img src={currentTrack.coverUrl} alt={currentTrack.title} className={`now-playing-cover ${isLoading ? 'loading-pulse' : ''}`} />
                         <div className="track-details">
-                            <p className="track-title text-truncate clickable">{currentTrack.title}</p>
+                            <p className="track-title text-truncate clickable">
+                                {isLoading ? "Cargando..." : currentTrack.title}
+                            </p>
                             <p className="track-artist text-truncate clickable">{currentTrack.artist}</p>
                         </div>
                     </>

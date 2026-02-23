@@ -273,3 +273,23 @@
         transform: none;
     }
 }
+
+/* Loading Animation */
+.loading-pulse {
+    animation: opacityPulse 1.5s ease-in-out infinite;
+    filter: grayscale(0.5);
+}
+
+@keyframes opacityPulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
+}
