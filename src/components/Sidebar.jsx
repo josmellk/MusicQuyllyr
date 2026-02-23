@@ -5,24 +5,22 @@ import { subscribeToSongs } from '../services/songService';
 import { createPlaylist, subscribeToPlaylists } from '../services/playlistService';
 import './Sidebar.css';
 
-const Sidebar = ({ onSearchClick, onLoginClick, currentView, onViewChange, onUploadClick, onCreatePlaylist, onDeletePlaylist }) => {
+const Sidebar = ({ onSearchClick, onLoginClick, currentView, onViewChange, onUploadClick, onCreatePlaylist, onDeletePlaylist, playlists = [] }) => {
     const { user, logout, isAdmin } = useAuth();
     const [likedCount, setLikedCount] = useState(0);
-    const [playlists, setPlaylists] = useState([]);
 
     useEffect(() => {
         const unsubscribeSongs = subscribeToSongs((songs) => {
-            const count = songs.filter(song => song.likedBy?.includes(user?.uid)).length;
-            setLikedCount(count);
+            if (user) {
+                const count = songs.filter(song => song.likedBy?.includes(user?.uid)).length;
+                setLikedCount(count);
+            } else {
+                setLikedCount(0);
+            }
         });
-
-        const unsubscribePlaylists = user ? subscribeToPlaylists(user.uid, (data) => {
-            setPlaylists(data);
-        }) : () => { };
 
         return () => {
             unsubscribeSongs();
-            unsubscribePlaylists();
         };
     }, [user]);
 

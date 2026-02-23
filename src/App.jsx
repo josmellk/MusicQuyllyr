@@ -46,20 +46,26 @@ function App() {
   const searchInputRef = React.useRef(null);
 
   useEffect(() => {
-    const unsubscribe = user ? subscribeToPlaylists(user.uid, (data) => {
-      setPlaylists(data);
-      // Update currentView if it's a playlist to reflect title/content changes
-      if (currentView.type === 'playlist') {
-        const currentPlaylist = data.find(p => p.id === currentView.id);
-        if (currentPlaylist) {
-          setCurrentView(prev => ({ ...prev, name: currentPlaylist.name, songIds: currentPlaylist.songIds }));
+    let unsubscribe = () => { };
+    if (user) {
+      unsubscribe = subscribeToPlaylists(user.uid, (data) => {
+        setPlaylists(data);
+        // Update currentView if it's a playlist to reflect title/content changes
+        if (currentView.type === 'playlist') {
+          const currentPlaylist = data.find(p => p.id === currentView.id);
+          if (currentPlaylist) {
+            setCurrentView(prev => ({ ...prev, name: currentPlaylist.name, songIds: currentPlaylist.songIds }));
+          }
         }
-      }
-    }) : () => {
+      });
+    } else {
       setPlaylists([]);
-    };
+      if (currentView.type === 'playlist' || currentView.type === 'liked') {
+        setCurrentView({ type: 'home' });
+      }
+    }
     return () => unsubscribe();
-  }, [user, currentView.id]);
+  }, [user, currentView.id, currentView.type]);
 
   const handleSearchClick = () => {
     if (searchInputRef.current) {
@@ -118,6 +124,7 @@ function App() {
           onUploadClick={handleOpenUpload}
           onCreatePlaylist={handleCreatePlaylist}
           onDeletePlaylist={handleDeletePlaylist}
+          playlists={playlists}
         />
         <div className="content-area">
           <Header
