@@ -3,12 +3,14 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Player from './components/Player';
 import Home from './pages/Home';
-import LoginModal from './components/LoginModal';
-import UploadModal from './components/UploadModal';
 import { useAuth } from './context/AuthContext';
 import { subscribeToPlaylists, createPlaylist, deletePlaylist } from './services/playlistService';
-import PlaylistModal from './components/PlaylistModal';
 import './App.css';
+
+// Fast Load: Lazy loading modals
+const LoginModal = React.lazy(() => import('./components/LoginModal'));
+const UploadModal = React.lazy(() => import('./components/UploadModal'));
+const PlaylistModal = React.lazy(() => import('./components/PlaylistModal'));
 
 function App() {
   const { user, logout } = useAuth();
@@ -177,18 +179,20 @@ function App() {
         repeatMode={repeatMode}
         setRepeatMode={setRepeatMode}
       />
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-      <UploadModal
-        isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
-        onUploadSuccess={() => { }}
-        editingSong={editingSong}
-      />
-      <PlaylistModal
-        isOpen={isPlaylistModalOpen}
-        onClose={() => setIsPlaylistModalOpen(false)}
-        onCreate={handleCreatePlaylist}
-      />
+      <React.Suspense fallback={null}>
+        <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+        <UploadModal
+          isOpen={isUploadOpen}
+          onClose={() => setIsUploadOpen(false)}
+          onUploadSuccess={() => { }}
+          editingSong={editingSong}
+        />
+        <PlaylistModal
+          isOpen={isPlaylistModalOpen}
+          onClose={() => setIsPlaylistModalOpen(false)}
+          onCreate={handleCreatePlaylist}
+        />
+      </React.Suspense>
     </div>
   );
 }

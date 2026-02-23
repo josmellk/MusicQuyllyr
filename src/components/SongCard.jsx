@@ -58,7 +58,12 @@ const SongCard = ({ song, onClick, onEdit, playlists = [], isCurrent = false, is
     return (
         <div className={`song-card clickable ${isCurrent ? 'playing' : ''}`} onClick={onClick}>
             <div className="card-image-container">
-                <img src={song.coverUrl} alt={song.title} className="card-image" />
+                <img
+                    src={song.coverUrl}
+                    alt={song.title}
+                    className="card-image"
+                    loading="lazy"
+                />
 
                 {isCurrent && (
                     <div className="playing-overlay glass">
@@ -149,4 +154,4 @@ const SongCard = ({ song, onClick, onEdit, playlists = [], isCurrent = false, is
     );
 };
 
-export default SongCard;
+export default React.memo(SongCard);
