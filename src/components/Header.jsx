@@ -3,8 +3,8 @@ import { ChevronLeft, ChevronRight, User, Search, LogOut, Moon, Sun, ChevronDown
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
-const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick, isDarkMode, setIsDarkMode }) => {
-    const { user, logout, isAdmin } = useAuth();
+const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick, onLogout, isDarkMode, setIsDarkMode }) => {
+    const { user, isAdmin } = useAuth();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const menuRef = useRef(null);
 
@@ -20,7 +20,9 @@ const Header = ({ searchQuery, setSearchQuery, inputRef, onLoginClick, isDarkMod
 
     const handleLogout = async () => {
         setShowProfileMenu(false);
-        await logout();
+        if (onLogout) {
+            await onLogout();
+        }
     };
 
     return (

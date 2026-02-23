@@ -11,7 +11,7 @@ import PlaylistModal from './components/PlaylistModal';
 import './App.css';
 
 function App() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,27 +45,26 @@ function App() {
   }, [repeatMode]);
   const searchInputRef = React.useRef(null);
 
+  // Subscribe to playlists
   useEffect(() => {
-    let unsubscribe = () => { };
-    if (user) {
-      unsubscribe = subscribeToPlaylists(user.uid, (data) => {
-        setPlaylists(data);
-        // Update currentView if it's a playlist to reflect title/content changes
-        if (currentView.type === 'playlist') {
-          const currentPlaylist = data.find(p => p.id === currentView.id);
-          if (currentPlaylist) {
-            setCurrentView(prev => ({ ...prev, name: currentPlaylist.name, songIds: currentPlaylist.songIds }));
-          }
-        }
-      });
-    } else {
+    if (!user) {
       setPlaylists([]);
-      if (currentView.type === 'playlist' || currentView.type === 'liked') {
-        setCurrentView({ type: 'home' });
-      }
+      setCurrentView({ type: 'home' });
+      return;
     }
+
+    const unsubscribe = subscribeToPlaylists(user.uid, (data) => {
+      setPlaylists(data);
+      if (currentView.type === 'playlist') {
+        const currentPlaylist = data.find(p => p.id === currentView.id);
+        if (currentPlaylist) {
+          setCurrentView(prev => ({ ...prev, name: currentPlaylist.name, songIds: currentPlaylist.songIds }));
+        }
+      }
+    });
+
     return () => unsubscribe();
-  }, [user, currentView.id, currentView.type]);
+  }, [user, currentView.id]); // Simplified dependencies
 
   const handleSearchClick = () => {
     if (searchInputRef.current) {
@@ -97,6 +96,18 @@ function App() {
     } catch (error) {
       console.error("Error al crear lista:", error);
       alert("Hubo un error al crear la lista. Por favor, inténtalo de nuevo.");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Clear state immediately and manually to ensure UI updates even if context is slow
+      setPlaylists([]);
+      setCurrentView({ type: 'home' });
+      setQueue([]);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
@@ -132,6 +143,7 @@ function App() {
             setSearchQuery={setSearchQuery}
             inputRef={searchInputRef}
             onLoginClick={() => setIsLoginOpen(true)}
+            onLogout={handleLogout}
             isDarkMode={isDarkMode}
             setIsDarkMode={setIsDarkMode}
           />
