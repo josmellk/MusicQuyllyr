@@ -31,110 +31,24 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
         return url;
     };
 
+    // Use refs to access latest state inside stable event listeners
+    const stateRef = useRef({ queue, currentTrack, isShuffle, repeatMode, isPlaying });
     useEffect(() => {
-        if (currentTrack) {
-            const finalUrl = cleanUrl(currentTrack.audioUrl);
-            console.log("Cargando audio desde:", finalUrl);
-
-            // Reiniciar el audio para la nueva pista
-            audioRef.current.pause();
-            audioRef.current.src = finalUrl;
-            audioRef.current.load(); // Forzar carga del nuevo recurso
-
-            if (isPlaying) {
-                const playPromise = audioRef.current.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(err => {
-                        console.error("Auto-play blocked or error:", err);
-                        setIsPlaying(false);
-                    });
-                }
-            }
-        }
-    }, [currentTrack]);
-
-    useEffect(() => {
-        if (!currentTrack?.audioUrl) return;
-
-        if (isPlaying) {
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(err => {
-                    console.error("Manual play error:", err);
-                    setIsPlaying(false);
-                });
-            }
-        } else {
-            audioRef.current.pause();
-        }
-    }, [isPlaying]);
-
-    const handleNext = () => {
-        if (queue.length === 0) return;
-
-        let nextIndex;
-        const currentIndex = queue.findIndex(t => t.id === currentTrack?.id);
-
-        if (isShuffle) {
-            nextIndex = Math.floor(Math.random() * queue.length);
-            // Evitar que se repita la misma canción si hay más de una
-            if (nextIndex === currentIndex && queue.length > 1) {
-                nextIndex = (nextIndex + 1) % queue.length;
-            }
-        } else {
-            nextIndex = currentIndex + 1;
-            if (nextIndex >= queue.length) {
-                if (repeatMode === 2) { // Repeat All
-                    nextIndex = 0;
-                } else {
-                    return setIsPlaying(false);
-                }
-            }
-        }
-
-        const nextTrack = queue[nextIndex];
-        if (nextTrack.id === currentTrack?.id) {
-            // Si es la misma canción (ej. lista de 1), reiniciar manualmente
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => setIsPlaying(false));
-            setIsPlaying(true);
-        } else {
-            setCurrentTrack(nextTrack);
-            setIsPlaying(true);
-        }
-    };
-
-    const handlePrev = () => {
-        if (queue.length === 0) return;
-
-        let prevIndex;
-        const currentIndex = queue.findIndex(t => t.id === currentTrack?.id);
-
-        if (isShuffle) {
-            prevIndex = Math.floor(Math.random() * queue.length);
-        } else {
-            prevIndex = currentIndex - 1;
-            if (prevIndex < 0) {
-                prevIndex = repeatMode === 2 ? queue.length - 1 : 0;
-            }
-        }
-
-        const prevTrack = queue[prevIndex];
-        if (prevTrack.id === currentTrack?.id) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => setIsPlaying(false));
-            setIsPlaying(true);
-        } else {
-            setCurrentTrack(prevTrack);
-            setIsPlaying(true);
-        }
-    };
+        stateRef.current = { queue, currentTrack, isShuffle, repeatMode, isPlaying };
+    }, [queue, currentTrack, isShuffle, repeatMode, isPlaying]);
 
     useEffect(() => {
         const audio = audioRef.current;
+        audio.preload = 'auto'; // Optimize for faster playback
 
-        // Sincronizar loop nativo para modo "Repetir una" (Modo 1 ahora)
-        audio.loop = (repeatMode === 1);
+        const handleEnded = () => {
+            if (stateRef.current.repeatMode === 1) {
+                audio.currentTime = 0;
+                audio.play().catch(console.error);
+            } else {
+                handleNext();
+            }
+        };
 
         const updateProgress = () => {
             setCurrentTime(audio.currentTime);
@@ -147,19 +61,10 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
 
         const handleError = (e) => {
             console.error("Audio error:", audio.error);
-            if (audio.error && audio.error.code === 4) {
-                alert("Error de Formato: No se pudo leer el archivo. \n\nEsto ocurre porque el enlace no es Directo. \n\nTip: Si usas Google Drive, el archivo debe ser pequeño (< 10MB). Si es grande, el navegador bloquea la música por seguridad.");
+            if (audio.error?.code === 4) {
+                alert("Error de Formato: No se pudo leer el archivo.");
             }
             setIsPlaying(false);
-        };
-
-        const handleEnded = () => {
-            if (repeatMode === 1) { // Repetir Una
-                audio.currentTime = 0;
-                audio.play().catch(console.error);
-            } else {
-                handleNext();
-            }
         };
 
         audio.addEventListener('timeupdate', updateProgress);
@@ -173,7 +78,93 @@ const Player = ({ currentTrack, isPlaying, setIsPlaying, setCurrentTrack, queue 
             audio.removeEventListener('error', handleError);
             audio.removeEventListener('ended', handleEnded);
         };
-    }, [queue, currentTrack, isShuffle, repeatMode]);
+    }, []); // Run once, using stateRef for logic
+
+    // Simplified track loading and playback logic
+    useEffect(() => {
+        if (!currentTrack) return;
+
+        const finalUrl = cleanUrl(currentTrack.audioUrl);
+        const audio = audioRef.current;
+
+        if (audio.src !== finalUrl) {
+            audio.pause();
+            audio.src = finalUrl;
+            // No need for audio.load() usually when setting src
+        }
+
+        if (isPlaying) {
+            audio.play().catch(err => {
+                console.error("Playback failed:", err);
+                setIsPlaying(false);
+            });
+        }
+    }, [currentTrack, isPlaying]);
+
+    const handleNext = () => {
+        if (queue.length === 0) return;
+
+        let nextIndex;
+        const state = stateRef.current;
+        const currentIndex = queue.findIndex(t => t.id === state.currentTrack?.id);
+
+        if (state.isShuffle) {
+            nextIndex = Math.floor(Math.random() * queue.length);
+            if (nextIndex === currentIndex && queue.length > 1) {
+                nextIndex = (nextIndex + 1) % queue.length;
+            }
+        } else {
+            nextIndex = currentIndex + 1;
+            if (nextIndex >= queue.length) {
+                if (state.repeatMode === 2) {
+                    nextIndex = 0;
+                } else {
+                    return setIsPlaying(false);
+                }
+            }
+        }
+
+        const nextTrack = queue[nextIndex];
+        if (nextTrack.id === state.currentTrack?.id) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => setIsPlaying(false));
+            setIsPlaying(true);
+        } else {
+            setCurrentTrack(nextTrack);
+            setIsPlaying(true);
+        }
+    };
+
+    const handlePrev = () => {
+        if (queue.length === 0) return;
+
+        let prevIndex;
+        const state = stateRef.current;
+        const currentIndex = queue.findIndex(t => t.id === state.currentTrack?.id);
+
+        if (state.isShuffle) {
+            prevIndex = Math.floor(Math.random() * queue.length);
+        } else {
+            prevIndex = currentIndex - 1;
+            if (prevIndex < 0) {
+                prevIndex = state.repeatMode === 2 ? queue.length - 1 : 0;
+            }
+        }
+
+        const prevTrack = queue[prevIndex];
+        if (prevTrack.id === state.currentTrack?.id) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => setIsPlaying(false));
+            setIsPlaying(true);
+        } else {
+            setCurrentTrack(prevTrack);
+            setIsPlaying(true);
+        }
+    };
+
+    useEffect(() => {
+        audioRef.current.loop = (repeatMode === 1);
+    }, [repeatMode]);
 
     const handleVolumeChange = (e) => {
         const newVolume = parseFloat(e.target.value);
